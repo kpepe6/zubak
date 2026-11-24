@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="sk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Zubák | Plagát hry</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Roboto+Slab:wght@400;600;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="plakat.css">
+  <script defer src="core.js"></script>
+  <script defer src="art.js"></script>
+  <script defer src="ending.js"></script>
+  <script defer src="plakat.js"></script>
+</head>
+<body>
+  <nav class="toolbar" aria-label="Plagát"><a href="index.html">← Späť do hry</a><button type="button" onclick="window.print()">Tlačiť plagát</button></nav>
+  <main class="poster" aria-label="Plagát hry Zubák">
+    <div class="top"><p class="eyebrow">REAL LIFE HARDCORE SIMULATOR</p><h1>ZUBÁK</h1><p class="subtitle">Záhada zatvorenej krčmy</p></div>
+    <canvas class="art" id="poster-art" width="960" height="540" role="img" aria-label="NG v záverečnej scéne hry"></canvas>
+    <div class="stamp">NAJOČAKÁVANEJŠIA<br>HRA STOROČIA<br>Z PROSTREDIA<br>BIELYCH KARPÁT</div>
+    <div class="bottom"><p class="tagline">Guláš sa varí. Pravda nie.</p><p class="description">Gulášfest je za dverami, krčma je zatvorená a slávnostná naberačka zmizla. NG musí vypočuť dedinu, pospájať stopy a zistiť, čo sa v Zubáku naozaj deje.</p></div>
+  </main>
+  <canvas id="scene" hidden></canvas><canvas id="foreground" hidden></canvas>
+</body>
+</html>

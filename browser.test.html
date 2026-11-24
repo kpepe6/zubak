@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="sk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Zubak - browser regressions</title>
+  <style>
+    body { margin: 16px; font: 16px Georgia, serif; color: #183d36; background: #eef3f1; }
+    h1 { font-size: 24px; }
+    button { padding: 8px 12px; margin: 0 8px 12px 0; cursor: pointer; }
+    iframe { display: block; border: 0; width: 1100px; max-width: none; height: 1000px; background: white; }
+    pre { white-space: pre-wrap; }
+  </style>
+  <script defer src="browser.test.js"></script>
+</head>
+<body>
+  <h1>Zubak: isolated browser regressions</h1>
+  <pre id="results" role="status">Running...</pre>
+  <button id="desktop">Desktop</button><button id="mobile">Mobile</button>
+  <button id="closed">Closed Spring</button><button id="opened">Open Spring</button>
+  <iframe id="test-game" title="Isolated game"></iframe>
+</body>
+</html>

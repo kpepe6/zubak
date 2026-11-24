@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="sk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Zubák | Krabica hry</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Roboto+Slab:wght@400;600;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="plakat.css">
+  <link rel="stylesheet" href="krabice.css">
+  <script defer src="core.js"></script>
+  <script defer src="art.js"></script>
+  <script defer src="ending.js"></script>
+  <script defer src="plakat.js"></script>
+</head>
+<body>
+  <nav class="toolbar"><a href="plakat.html">← Späť na plagát</a></nav>
+  <main class="box-stage" aria-label="Krabica hry Zubák">
+    <div class="stains" aria-hidden="true"></div>
+    <div class="ladle" aria-hidden="true"><div class="ladle-handle"></div><div class="ladle-bowl"></div></div>
+    <div class="cigarettes" aria-hidden="true"><span></span><span></span><span></span></div>
+    <div class="game-box">
+      <div class="box-spine" aria-hidden="true"><span>ZUBÁK</span><small>ZÁHADA ZATVORENEJ KRČMY</small></div>
+      <div class="poster" aria-label="Predná strana krabice">
+        <div class="top"><p class="eyebrow">REAL LIFE HARDCORE SIMULATOR</p><h1>ZUBÁK</h1><p class="subtitle">Záhada zatvorenej krčmy</p></div>
+        <canvas class="art" id="poster-art" width="960" height="540" role="img" aria-label="NG v záverečnej scéne hry"></canvas>
+        <div class="stamp">NAJOČAKÁVANEJŠIA<br>HRA STOROČIA<br>Z PROSTREDIA<br>BIELYCH KARPÁT</div>
+        <div class="bottom"><p class="tagline">Guláš sa varí. Pravda nie.</p><p class="description">Gulášfest je za dverami, krčma je zatvorená a slávnostná naberačka zmizla. NG musí vypočuť dedinu, pospájať stopy a zistiť, čo sa v Zubáku naozaj deje.</p></div>
+      </div>
+    </div>
+  </main>
+  <canvas id="scene" hidden></canvas><canvas id="foreground" hidden></canvas>
+</body>
+</html>

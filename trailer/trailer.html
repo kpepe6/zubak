@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="sk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Zubák | Trailer</title>
+  <style>
+    :root{color-scheme:dark;font-family:Georgia,serif;background:#172b24;color:#fff2cf}
+    *{box-sizing:border-box}body{margin:0;min-height:100dvh;background:repeating-linear-gradient(135deg,#ffffff03 0 1px,transparent 1px 9px)}
+    main{max-width:1280px;margin:auto;padding:24px}a{color:#f3cd69}.back-to-menu{display:inline-flex;align-items:center;margin-bottom:16px;text-decoration:none}
+    #trailer{display:block;width:100%;aspect-ratio:16/9;background:#15291f;box-shadow:0 12px 40px #0005}#scene,#foreground{display:none}
+    .controls{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:16px 0}button,.back-to-menu,.controls a:not([hidden]){font:700 14px 'Trebuchet MS',Verdana,sans-serif;border:1px solid #fff0c8;border-radius:3px;padding:12px 22px;background:#f3ead4;color:#20392f;cursor:pointer}#play{background:#edd39b}button:hover,.back-to-menu:hover,.controls a:hover{border-color:#f2cc71;color:#20392f;background:#d6e0c3}button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid #f2cc71;outline-offset:3px}button:disabled{opacity:.5;cursor:default}input{accent-color:#f3cd69}#status{margin-left:auto;font-size:14px;color:#c1cebb}
+    @media(max-width:600px){main{padding:12px}h1{font-size:22px}#status{width:100%;margin:0}}
+  </style>
+</head>
+<body>
+  <main>
+    <a class="back-to-menu" href="../index.html?from=trailer">← Späť do menu</a>
+    <canvas id="trailer" width="1920" height="1080" aria-label="Trailer hry Zubák"></canvas>
+    <div class="controls">
+      <button id="play" type="button">Prehrať trailer</button>
+      <button id="export" type="button">Export MP4</button>
+      <button id="export-webm" type="button">Export WebM</button>
+      <a id="download" hidden>Stiahnuť MP4</a>
+      <a id="download-webm" hidden>Stiahnuť WebM</a>
+      <label><input id="sound" type="checkbox" checked> Hudba</label>
+      <span id="status" role="status">00:00 / 00:30</span>
+    </div>
+  </main>
+  <canvas id="scene" width="1920" height="1080"></canvas>
+  <canvas id="foreground" width="1920" height="1080"></canvas>
+  <script src="../core.js"></script>
+  <script src="../art.js"></script>
+  <script src="trailer.js"></script>
+</body>
+</html>

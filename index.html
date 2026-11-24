@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="sk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#182d29">
+  <title>Zubák • Záhada zatvorenej krčmy</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="goulash.css">
+  <link rel="stylesheet" href="ending.css">
+  <script defer src="core.js"></script>
+  <script defer src="art.js"></script>
+  <script defer src="bike.js"></script>
+  <script defer src="bike-ui.js"></script>
+  <script defer src="goulash.js"></script>
+  <script defer src="goulash-ui.js"></script>
+  <script defer src="ending.js"></script>
+  <script defer src="game.js"></script>
+</head>
+<body>
+  <main class="game-shell">
+    <header class="topbar">
+      <a class="wordmark" href="index.html">ZUBÁK<span>NG A ZÁHADA ZATVORENEJ KRČMY</span></a>
+      <div class="toolbar">
+        <button id="map-button" title="Mapa dediny" aria-label="Mapa dediny"><span aria-hidden="true">⌖</span></button>
+        <button id="journal-button" title="Denník stôp" aria-label="Denník stôp"><span aria-hidden="true">▤</span><span id="clue-count">0</span></button>
+        <button id="sound-button" title="Vypnúť zvuk" aria-label="Vypnúť zvuk" aria-pressed="true">
+          <svg class="sound-icon-on" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 9h3.5L13 5v14l-5.5-4H4z"/><path d="M16 8.5a5 5 0 0 1 0 7"/><path d="M18.5 6a9 9 0 0 1 0 12"/></svg>
+          <svg class="sound-icon-off" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 9h3.5L13 5v14l-5.5-4H4z"/><path d="m16 9.5 5 5M21 9.5l-5 5"/></svg>
+        </button>
+        <button id="help-button" title="Nápoveda" aria-label="Nápoveda">?</button>
+        <button id="settings-button" title="Nastavenia" aria-label="Nastavenia">⚙</button>
+      </div>
+    </header>
+    <section class="world" aria-label="Herný svet">
+      <canvas id="scene" width="960" height="540" aria-label="Pixelová mapa Zubáka"></canvas>
+      <div class="scene-heading"><span id="chapter">PRÍPAD 01 / BIELE KARPATY</span><h1 id="location-name">Zubák</h1><p id="location-sub">Záhada zatvorenej krčmy</p></div>
+      <button id="back-button" class="back" hidden title="Späť na mapu">← Mapa</button>
+      <div id="hotspots" class="hotspots"></div>
+      <canvas id="foreground" width="1920" height="1080" aria-hidden="true"></canvas>
+      <div class="world-caption"><span id="world-status">Sobota • pred gulášfestom</span><span id="save-status">Postup sa ukladá</span></div>
+    </section>
+    <section class="adventure-desk">
+      <div class="conversation">
+        <div class="speaker-row"><div><span id="speaker">NG</span><p id="speech" role="status" aria-live="polite">Dnes mal byť len guláš. Lenže studňa vysychá, krčma je zatvorená a niekto odniesol slávnostnú naberačku.</p></div></div>
+        <div id="choices" class="choices" aria-label="Možnosti rozhovoru"></div>
+      </div>
+      <aside class="bag"><div class="section-label"><h2>V BATOHU</h2><span id="selected-label">Nič nie je vybrané</span></div><div id="inventory" class="inventory"></div></aside>
+    </section>
+    <footer><span>ZUBÁK / DOBRODRUŽSTVO NG</span><span id="progress">0 stôp</span><button id="sources-button">O príbehu a miestach</button></footer>
+  </main>
+  <dialog id="startup-loading" class="startup-loading" aria-label="Načítanie hry">
+    <img src="zubak-krabice.png" alt="Krabica hry Zubák na kostkovanom obruse">
+    <div class="startup-loading-copy" role="status">
+      <span>Načítava sa Zubák...</span>
+      <div class="startup-loading-track" aria-hidden="true"><div class="startup-loading-progress"></div></div>
+    </div>
+  </dialog>
+  <dialog id="intro" class="story-intro" aria-labelledby="intro-title" aria-describedby="intro-story">
+    <div class="intro-copy">
+      <p class="intro-chapter">ZUBÁK / PRÍPAD 01</p>
+      <h2 id="intro-title">Záhada zatvorenej krčmy</h2>
+      <div id="intro-story">
+        <p>V Zubáku sa chystá gulášfest, najväčšia udalosť celého roka. Dedina sa naň teší celé mesiace. Kotlíky sú pripravené, Fifko má hlad a NG dúfa, že si tú slávnu sobotu konečne užije v pokoji.</p>
+        <p>Lenže krčma je zatvorená. Po dedine sa šíria reči, z ihriska zmizla slávnostná naberačka a v lese za domom je v studni zase primálo vody.</p>
+        <p>Náhoda? Možno. Každý však videl niečo iné a nikto nepozná celý príbeh.</p>
+        <p class="intro-voice">„Dobre. Začnem doma. A tentoraz sa neuspokojím s tým, že niekto niečo počul.“</p>
+      </div>
+      <div class="intro-actions"><button id="intro-continue" type="button">Pokračovať v hre</button><button id="intro-start" type="button">Nová hra</button><button id="intro-finale" type="button" hidden>Prehrať záverečné banger video</button><a id="intro-trailer" href="trailer/trailer.html">Pozrieť trailer</a></div>
+      <p class="intro-disclaimer">Všetky osoby a informácie v hre sú založené na skutočných udalostiach.</p>
+    </div>
+  </dialog>
+  <dialog id="modal"><div class="dialog-heading"><h2 id="modal-title"></h2><button id="close-modal" aria-label="Zavrieť" title="Zavrieť">×</button></div><div id="modal-content"></div></dialog>
+</body>
+</html>

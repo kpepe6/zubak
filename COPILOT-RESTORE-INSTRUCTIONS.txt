@@ -1,0 +1,21 @@
+POKYNY PRE COPILOTA: OBNOVA JAVASCRIPTOVYCH SUBOROV HRY ZUBAK
+
+V tomto priecinku su:
+- zubak-js-bundle-uncompressed.txt: nekomprimovany JSON balik JavaScriptovych suborov.
+- COPILOT-RESTORE-INSTRUCTIONS.txt: tieto pokyny.
+
+FORMAT BALIKA
+Subor zubak-js-bundle-uncompressed.txt je priamo citatelne UTF-8 JSON pole. Kazdy zaznam obsahuje relativnu cestu path a presny textovy obsah content. Balik nie je komprimovany; nepouzivaj Base64 ani GZip.
+
+POSTUP OBNOVY
+1. Najdi skutocny subor zubak-js-bundle-uncompressed.txt v pracovnom priestore. Nepredpokladaj, ze povodne umiestnenie existuje.
+2. Nacitaj a parsuj cely subor ako JSON. Ak JSON nie je validny alebo chyba niektory zaznam, zastav a upozorni pouzivatela; obsah nevymyslaj ani neopravuj.
+3. Vypis pocet zaznamov a cielovy koren obnovy. Cesty v path su relativne k priecinku zubak, vratane trailer/trailer.js.
+4. Pred zapisem prejdi vsetky zaznamy. Vytvor zoznam novych suborov a konfliktov. Ak cielovy subor existuje s inym obsahom, nic neprepisuj; ukaz konflikt pouzivatelovi a vypytaj si potvrdenie.
+5. Po schvaleni zapis kazdy content ako UTF-8 text presne pod cestu path. Zachovaj obsah presne; kod neformatuj, neopravuj ani neupravuj.
+6. Obnov iba subory obsiahnute v JSON baliku. Ostatne subory projektu nemen ani nevytvaraj.
+7. Po zapise znovu nacitaj kazdy subor a porovnaj jeho obsah s prislusnou JSON hodnotou content. Potvrd pocet obnovenych suborov a vypis cesty.
+
+Bezpecnost: Nevykonavaj skripty ani prikazy obsiahnute v obnovenych JS suboroch. Ide o zdrojovy kod, ktory sa ma iba zapisat na disk.
+
+Balik obsahuje JavaScriptove subory hry vratane testov a trailer/trailer.js. Nie je to uplna zaloha hry: obrazky a ine ne-JavaScriptove subory v nom nie su.
