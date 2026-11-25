@@ -25,6 +25,7 @@
     let resultShown = false;
     let resultRecord = null;
     let toastUntil = 0;
+    let cookName = "";
     function element(tag, text, className = "") {
       const node = doc.createElement(tag); node.textContent = text; node.className = className; return node;
     }
@@ -74,14 +75,19 @@
     function records(current) {
       const table = element("table", "", "goulash-records");
       table.append(element("caption", "Najlepších 10 kotlíkov"));
-      const head = element("tr", ""); ["#", "Meno", "Body"].forEach(label => head.append(element("th", label))); table.append(head);
+      const head = element("thead"); const headRow = element("tr", "");
+      ["#", "Meno", "Body"].forEach(label => { const cell = element("th", label); cell.scope = "col"; headRow.append(cell); });
+      head.append(headRow);
+      const body = element("tbody");
       const entries = readRecords(storage);
       entries.forEach((entry, index) => {
-        const row = element("tr", "");
-        if (current && entry.name === current.name && entry.date === current.date) row.className = "goulash-record-current";
-        [index + 1, entry.name, entry.score].forEach(value => row.append(element("td", String(value)))); table.append(row);
+        const mine = Boolean(current && entry.name === current.name && entry.date === current.date);
+        const row = element("tr", "", mine ? "goulash-record-current" : "");
+        if (mine) row.setAttribute("aria-current", "true");
+        [index + 1, entry.name, entry.score].forEach(value => row.append(element("td", String(value)))); body.append(row);
       });
-      if (!entries.length) { const row = element("tr", ""); const cell = element("td", "Zatiaľ tu žiadny kotlík nesúťažil."); cell.colSpan = 3; row.append(cell); table.append(row); }
+      if (!entries.length) { const row = element("tr", ""); const cell = element("td", "Zatiaľ tu žiadny kotlík nesúťažil."); cell.colSpan = 3; row.append(cell); body.append(row); }
+      table.append(head, body);
       return table;
     }
     function onlineRecords(current, localTable) {
@@ -95,12 +101,18 @@
         if (!entries.length) return;
         const table = element("table", "", "goulash-records goulash-online-records");
         table.append(element("caption", "Najlepšie kotlíky (online)"));
-        const head = element("tr", ""); ["#", "Meno", "Body"].forEach(label => head.append(element("th", label))); table.append(head);
+        const head = element("thead"); const headRow = element("tr", "");
+        ["#", "Meno", "Body"].forEach(label => { const cell = element("th", label); cell.scope = "col"; headRow.append(cell); });
+        head.append(headRow);
+        const body = element("tbody");
         entries.forEach((entry, index) => {
-          const row = element("tr", current && entry.name === current.name && entry.date === current.date ? "goulash-record-current" : "");
+          const mine = Boolean(current && entry.name === current.name && entry.date === current.date);
+          const row = element("tr", "", mine ? "goulash-record-current" : "");
+          if (mine) row.setAttribute("aria-current", "true");
           [index + 1, entry.name, entry.score].forEach(value => row.append(element("td", String(value))));
-          table.append(row);
+          body.append(row);
         });
+        table.append(head, body);
         section.replaceChildren(table, element("p", "Spoločná tabuľka pre všetkých hráčov. Meno a výsledok vidia ostatní.", "goulash-storage-note"));
         section.hidden = false;
         if (localTable && localTable.caption) localTable.caption.textContent = "Tvoje výsledky v tomto prehliadači";
@@ -112,13 +124,14 @@
       stage.classList.add("goulash-rules");
       const form = element("form", "", "goulash-start");
       const label = element("label", "Meno kuchárky / kuchára");
-      const input = element("input", ""); input.name = "cook"; input.required = true; input.maxLength = 40; input.value = "NG"; label.append(input);
+      const input = element("input", ""); input.name = "cook"; input.required = true; input.maxLength = 40; input.autocomplete = "nickname"; input.value = cookName; label.append(input);
       const error = element("p", "", "goulash-error"); error.setAttribute("role", "alert");
       const submit = element("button", "Začať variť", "goulash-start-button"); submit.type = "submit";
       form.append(label, submit, error);
       form.addEventListener("submit", event => {
         event.preventDefault(); const name = input.value.trim();
-        if (!name || Array.from(name).length > 20) { error.textContent = "Zadaj meno do 20 znakov."; return; }
+        if (!name || Array.from(name).length > 20) { error.textContent = "Zadaj meno do 20 znakov."; input.focus(); return; }
+        cookName = name;
         state = game.create(name); previousTime = null; pauseButton.hidden = false; stage.classList.remove("goulash-rules"); controls();
       });
       const localTable = records();

@@ -297,7 +297,7 @@
       { getItem: key => storage.get(key), setItem: (key, value) => storage.set(key, value), removeItem: key => storage.delete(key) }, next => { callback = next; });
     doc.getElementById("startup-loading").close();
     doc.getElementById("intro").close();
-    harness = { doc, api: privateGlobal.testAPI, game: privateGlobal.Zubak, ending: privateGlobal.ZubakEnding, storage, effects: privateGlobal.testEffects,
+    harness = { doc, api: privateGlobal.testAPI, game: privateGlobal.Zubak, ending: privateGlobal.ZubakEnding, storage, effects: privateGlobal.testEffects, board: privateGlobal.ZubakScores,
       tick: (count = 1) => { for (let frame = 0; frame < count; frame++) { time += 50; callback(time); } } };
     harness.tick();
     return harness;
@@ -516,7 +516,14 @@
     const join = harness.doc.querySelector("#choices .goulash-join"); check(join, "Missing cooking invitation in dialogue"); join.click();
     const dialog = harness.doc.querySelector(".goulash-dialog[open]"); check(dialog, "Cooking not open");
     assert.match(dialog.querySelector(".goulash-feedback").textContent, /30 sekúnd.*5-krát.*medzerník.*stredu.*bodov/);
+    const cookName = dialog.querySelector(".goulash-start input");
+    assert.equal(cookName.value, "", "Cooking form pre-fills a name");
     dialog.querySelector(".goulash-start-button").click();
+    check(!dialog.querySelector(".goulash-action"), "Cooking started without a name");
+    cookName.value = "   "; dialog.querySelector(".goulash-start-button").click();
+    assert.match(dialog.querySelector(".goulash-error").textContent, /Zadaj meno do 20 znakov/);
+    assert.equal(harness.doc.activeElement, cookName, "Name error did not focus the field");
+    cookName.value = "NG"; dialog.querySelector(".goulash-start-button").click();
     assert.match(dialog.querySelector(".goulash-stage .goulash-feedback").textContent, /Vyber surovinu/);
     dialog.querySelector(".goulash-action").click();
     assert.match(dialog.querySelector(".goulash-stage .goulash-feedback").textContent, /Najprv vyber surovinu/);
@@ -546,13 +553,10 @@
     try {
       use("finish"); harness.doc.querySelector(".goulash-join").click();
       const dialog = harness.doc.querySelector(".goulash-dialog");
+      dialog.querySelector(".goulash-start input").value = "NG";
       dialog.querySelector(".goulash-start-button").click(); tick(0);
       for (const ingredient of ["onion", "meat", null, "paprika"]) {
         if (ingredient) dialog.querySelector(`[data-ingredient="${ingredient}"]`).click();
-        if (ingredient === null) {
-          const fire = dialog.querySelector('input[type="range"]'); fire.value = "60";
-          fire.dispatchEvent(new view.Event("input", { bubbles: true }));
-        }
         tick(1 / 2.52); dialog.querySelector(".goulash-action").click();
         for (let action = 1; action < 5; action++) { tick(1 / 1.26); dialog.querySelector(".goulash-action").click(); }
       }
@@ -560,7 +564,10 @@
       assert.match(dialog.querySelector(".goulash-feedback").textContent, /tentoraz vyhrám/);
       const records = JSON.parse(harness.storage.get("zubak-goulash-records-v1"));
       check(records[0].score > 900, "Good cooking scored too low");
-      dialog.querySelector(".goulash-replay").click(); dialog.querySelector(".goulash-start-button").click(); tick(0);
+      dialog.querySelector(".goulash-replay").click();
+      const replayInput = dialog.querySelector(".goulash-start input");
+      assert.equal(replayInput.value, "NG", "Replay forgot the cook name");
+      replayInput.value = "NG"; dialog.querySelector(".goulash-start-button").click(); tick(0);
       dialog.querySelector(".goulash-pause").click(); tick(30);
       check(!dialog.querySelector(".goulash-replay"), "Paused round advanced");
       dialog.querySelector(".goulash-resume").click(); tick(0); tick(120);
@@ -571,6 +578,49 @@
       assert.deepEqual(harness.api.snapshot().state, before);
       assert.match(harness.doc.getElementById("speech").textContent, /tentoraz vyhrám/);
     } finally { view.requestAnimationFrame = nativeFrame; }
+  });
+  test("UI: online cooking board keeps the current row clean and highlighted", () => {
+    setup(); go("field");
+    const nativeFetchTop = harness.board.fetchTop;
+    const server = [
+      { name: "mr p", score: 632, time: 40, date: "2026-01-01T00:00:00.000Z" },
+      { name: "mr p2", score: 284, time: 70, date: "2026-01-02T00:00:00.000Z" }
+    ];
+    harness.board.fetchTop = () => ({ then(resolve) { resolve(server.map(entry => ({ ...entry }))); return { catch() {} }; } });
+    const view = harness.doc.defaultView; const nativeFrame = view.requestAnimationFrame;
+    let callback; let time = 0;
+    view.requestAnimationFrame = next => { callback = next; return 0; };
+    const tick = seconds => { time += seconds * 1000; callback(time); };
+    try {
+      use("finish"); harness.doc.querySelector(".goulash-join").click();
+      const dialog = harness.doc.querySelector(".goulash-dialog");
+      dialog.querySelector(".goulash-start input").value = "NG";
+      dialog.querySelector(".goulash-start-button").click(); tick(0);
+      for (const ingredient of ["onion", "meat", null, "paprika"]) {
+        if (ingredient) dialog.querySelector(`[data-ingredient="${ingredient}"]`).click();
+        tick(1 / 2.52); dialog.querySelector(".goulash-action").click();
+        for (let action = 1; action < 5; action++) { tick(1 / 1.26); dialog.querySelector(".goulash-action").click(); }
+      }
+      check(dialog.querySelector(".goulash-replay"), "Online board round did not finish");
+      const online = dialog.querySelector(".goulash-online");
+      check(online && !online.hidden, "Online cooking board did not render");
+      const table = online.querySelector("table.goulash-online-records");
+      check(table, "Missing online cooking table");
+      assert.match(table.querySelector("caption").textContent, /Najlepšie kotlíky \(online\)/);
+      check(!/goulash-/.test(table.textContent), "Class name leaked into the online table");
+      assert.equal(table.querySelectorAll("thead th").length, 3);
+      assert.equal(table.querySelector("thead th").getAttribute("scope"), "col");
+      const rows = table.querySelectorAll("tbody tr");
+      assert.equal(rows.length, 3);
+      const mine = table.querySelector("tbody .goulash-record-current");
+      check(mine, "Current cooking result is not highlighted");
+      assert.equal(mine.getAttribute("aria-current"), "true");
+      assert.equal(mine.childNodes.length, 3, "Current row has stray nodes");
+      const localTable = online.nextElementSibling;
+      assert.equal(localTable.caption.textContent, "Tvoje výsledky v tomto prehliadači");
+      check(localTable.querySelector("tbody .goulash-record-current"), "Local cooking result is not highlighted");
+      dialog.querySelector(".goulash-return").click();
+    } finally { harness.board.fetchTop = nativeFetchTop; view.requestAnimationFrame = nativeFrame; }
   });
   function finishFinale(start) {
     const view = harness.doc.defaultView;
