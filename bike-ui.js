@@ -1,36 +1,16 @@
 (function (root) {
   "use strict";
-  const recordKey = "zubak-bike-records-v1";
   let serial = 0;
 
-  function validated(record) {
-    if (!record || typeof record !== "object" || typeof record.name !== "string") return null;
-    const name = record.name.trim();
-    if (!name || Array.from(name).length > 20 || !Number.isFinite(record.time) || record.time <= 0 ||
-        record.time > 86400 || !Number.isSafeInteger(record.falls) || record.falls < 0 || record.falls > 100000 ||
-        typeof record.date !== "string" || !Number.isFinite(Date.parse(record.date))) return null;
-    return { name, time: record.time, falls: record.falls, date: new Date(record.date).toISOString() };
+  function board() {
+    const scores = root.ZubakScores;
+    if (!scores) throw new Error("Chýba modul ZubakScores.");
+    return scores;
   }
 
-  function ranked(records) {
-    return records.sort((first, second) => first.time - second.time || Date.parse(first.date) - Date.parse(second.date)).slice(0, 10);
-  }
+  function readRecords(storage) { return board().readLocal("bike", storage); }
 
-  function readRecords(storage) {
-    try {
-      const records = JSON.parse(storage.getItem(recordKey));
-      return Array.isArray(records) ? ranked(records.map(validated).filter(Boolean)) : [];
-    } catch (_) { return []; }
-  }
-
-  function saveRecord(storage, record) {
-    const clean = validated(record);
-    if (!clean) return false;
-    try {
-      storage.setItem(recordKey, JSON.stringify(ranked([...readRecords(storage), clean])));
-      return true;
-    } catch (_) { return false; }
-  }
+  function saveRecord(storage, record) { return board().saveLocal("bike", storage, record); }
 
   function open(options = {}) {
     const doc = options.document || root.document;
@@ -170,7 +150,9 @@
         chosenName = name;
         begin();
       });
-      panel.append(computerInstructions, mobileInstructions, generalInstructions, form, node("p", "bike-storage-note", "Najlepších 10 jázd sa ukladá iba v tomto prehliadači, oddelene od príbehu."));
+      panel.append(computerInstructions, mobileInstructions, generalInstructions, form,
+        node("p", "bike-storage-note", "Najlepších 10 jázd sa ukladá v tomto prehliadači oddelene od príbehu. Spoločná tabuľka je dostupná, keď je pripojenie."),
+        onlineSection(null, null));
       input.focus();
     }
 
@@ -240,6 +222,45 @@
       stay.focus();
     }
 
+    function onlineTable(entries, current) {
+      const table = node("table", "bike-records bike-online-records");
+      table.append(node("caption", "bike-records-caption", "Najlepší hráči (online)"));
+      const head = node("thead");
+      const row = node("tr");
+      ["Poradie", "Meno", "Čas", "Pády"].forEach(text => {
+        const cell = node("th", "", text);
+        cell.scope = "col";
+        row.append(cell);
+      });
+      head.append(row);
+      const body = node("tbody");
+      entries.forEach((entry, index) => {
+        const mine = Boolean(current && entry.name === current.name && entry.date === current.date);
+        const resultRow = node("tr", mine ? "bike-record-current" : "");
+        if (mine) resultRow.setAttribute("aria-current", "true");
+        [String(index + 1), entry.name, bike.format(entry.time), String(entry.falls)].forEach(text => resultRow.append(node("td", "", text)));
+        body.append(resultRow);
+      });
+      table.append(head, body);
+      return table;
+    }
+
+    function onlineSection(current, localTable) {
+      const section = node("section", "bike-online");
+      section.hidden = true;
+      const scores = root.ZubakScores;
+      if (!scores || !scores.available("bike")) return section;
+      scores.fetchTop("bike", { storage }).then(server => {
+        if (closed || !server) return;
+        const entries = current ? scores.merge("bike", server, [current]) : scores.merge("bike", server);
+        if (!entries.length) return;
+        section.replaceChildren(onlineTable(entries, current), node("p", "bike-storage-note", "Spoločná tabuľka pre všetkých hráčov. Meno a výsledok vidia ostatní."));
+        section.hidden = false;
+        if (localTable && localTable.caption) localTable.caption.textContent = "Tvoje výsledky v tomto prehliadači";
+      }).catch(() => {});
+      return section;
+    }
+
     function finish() {
       resultShown = true;
       clearInput();
@@ -247,7 +268,7 @@
       controls.hidden = true;
       const record = { name: chosenName, time: state.elapsed, falls: state.falls, date: new Date().toISOString() };
       const saved = saveRecord(storage, record);
-      const records = saved ? readRecords(storage) : ranked([...readRecords(storage), record]);
+      const records = saved ? readRecords(storage) : board().rank("bike", [...readRecords(storage), record]);
       panel.hidden = false;
       panel.replaceChildren();
       heading("Cieľ pri obecnom úrade!");
@@ -277,7 +298,8 @@
       const actions = node("div", "bike-actions");
       const replay = button("Ďalšia jazda", "bike-replay", startScreen);
       actions.append(replay, button("Nové meno", "bike-new-name", () => { chosenName = ""; startScreen(); }), button("Ukončiť jazdu", "bike-return", close));
-      panel.append(table, actions);
+      panel.append(onlineSection(record, table), table, actions);
+      board().submit("bike", record, { storage }).catch(() => {});
       replay.focus();
     }
 
@@ -877,6 +899,7 @@
     startScreen();
     draw();
     frameId = view.requestAnimationFrame(frame);
+    if (root.ZubakScores) root.ZubakScores.flush("bike", { storage }).catch(() => {});
     return { close, dialog, canvas };
   }
 

@@ -1,7 +1,7 @@
 (async function () {
   "use strict";
-  const files = ["index.html", "styles.css", "core.js", "art.js", "game.js", "core.test.js", "bike.js", "bike-ui.js", "goulash.js", "goulash-ui.js", "goulash.css", "ending.js", "ending.css"];
-  const [html, css, core, art, ui, tests, bike, bikeUI, goulash, goulashUI, goulashCSS, ending, endingCSS] = await Promise.all(files.map(async file => (await fetch(file)).text()));
+  const files = ["index.html", "styles.css", "core.js", "art.js", "game.js", "core.test.js", "bike.js", "bike-ui.js", "goulash.js", "goulash-ui.js", "goulash.css", "ending.js", "ending.css", "scores.js"];
+  const [html, css, core, art, ui, tests, bike, bikeUI, goulash, goulashUI, goulashCSS, ending, endingCSS, scores] = await Promise.all(files.map(async file => (await fetch(file)).text()));
   const iframe = document.getElementById("test-game");
   if (new URLSearchParams(location.search).get("viewport") === "mobile") iframe.style.width = "390px";
   const results = [];
@@ -21,6 +21,7 @@
   const isolated = {};
   new Function("globalThis", core)(isolated);
   new Function("globalThis", bike)(isolated);
+  new Function("globalThis", scores)(isolated);
   new Function("globalThis", bikeUI)(isolated);
   new Function("globalThis", goulash)(isolated);
   new Function("globalThis", goulashUI)(isolated);
@@ -54,6 +55,37 @@
     check(!board.saveRecord(storage, { name: "NG", score: 1001, time: 50, date: "2026-01-01" }), "Invalid score saved");
     values.set("zubak-goulash-records-v1", "{bad"); assert.equal(board.readRecords(storage).length, 0);
     check(!board.saveRecord({ getItem() { throw Error(); }, setItem() { throw Error(); } }, { name: "NG", score: 50, time: 50, date: "2026-01-01" }), "Storage failure hidden");
+  });
+  test("Scores: shared board helpers, dedupe, queue and offline fallback", () => {
+    const shared = isolated.ZubakScores;
+    check(shared, "Missing ZubakScores module");
+    const values = new Map();
+    const storage = { getItem: key => values.get(key), setItem: (key, value) => values.set(key, value), removeItem: key => values.delete(key) };
+    const bike = { name: "NG", time: 90, falls: 1, date: "2026-05-01T10:00:00.000Z" };
+    const goulash = { name: "NG", score: 700, time: 60, date: "2026-05-01T10:00:00.000Z" };
+    assert.equal(shared.validate("bike", bike).time, 90);
+    assert.equal(shared.validate("bike", { name: "NG", time: 90, falls: -1, date: "2026-05-01" }), null);
+    assert.equal(shared.validate("goulash", { name: "NG", score: 1001, time: 60, date: "2026-05-01" }), null);
+    assert.equal(shared.validate("goulash", goulash).score, 700);
+    assert.equal(shared.plausible("bike", { name: "NG", time: 5, falls: 0, date: "2026-05-01" }), false);
+    check(shared.saveLocal("bike", storage, bike), "Local bike save failed");
+    assert.equal(shared.readLocal("bike", storage)[0].name, "NG");
+    const other = { name: "Fifko", time: 80, falls: 0, date: "2026-05-02T10:00:00.000Z" };
+    const merged = shared.merge("bike", [bike, bike], [other, { name: "<img>", time: 10, falls: 0, date: "2026-05-02T10:00:00.000Z" }]);
+    assert.equal(merged.length, 2);
+    assert.equal(merged[0].name, "Fifko");
+    assert.equal(merged[1].name, "NG");
+    check(shared.queue("bike", bike, storage), "Queue failed");
+    check(shared.queue("bike", bike, storage), "Repeated queue failed");
+    assert.equal(shared.pending(storage, "bike").length, 1);
+    assert.equal(shared.pending(storage, "goulash").length, 0);
+    shared.clearQueue(storage, "bike");
+    assert.equal(shared.pending(storage, "bike").length, 0);
+    assert.equal(shared.available("bike"), false);
+    shared.submit("goulash", goulash, { storage });
+    assert.equal(shared.pending(storage, "goulash").length, 1);
+    assert.equal(shared.pending(storage, "bike").length, 0);
+    shared.clearQueue(storage, "goulash");
   });
   test("Bike: cadence, falls, pause, clock and frame rates", () => {
     const ride = (pedalling, step) => {
@@ -247,6 +279,7 @@
     new Function("globalThis", core)(privateGlobal);
     new Function("globalThis", "document", art)(privateGlobal, doc);
     new Function("globalThis", bike)(privateGlobal);
+    new Function("globalThis", scores)(privateGlobal);
     new Function("globalThis", bikeUI)(privateGlobal);
     new Function("globalThis", goulash)(privateGlobal);
     new Function("globalThis", goulashUI)(privateGlobal);

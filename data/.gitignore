@@ -1,0 +1,5 @@
+# Súbory s dátami hráčov sa necommitujú – na hostingu ich vytvorí scores.php.
+*.json
+*.lock
+*.tmp
+*.corrupt-*

@@ -2,7 +2,7 @@
   "use strict";
   const game = globalThis.Zubak;
   const storageKey = "zubak-adventure-v1";
-  const recordKeys = ["zubak-bike-records-v1", "zubak-goulash-records-v1"];
+  const recordKeys = ["zubak-bike-records-v1", "zubak-goulash-records-v1", "zubak-scores-queue-v1", "zubak-scores-uploaded-v1"];
   const byId = id => document.getElementById(id);
   let state = game.createState();
   let saveAvailable = true;
@@ -290,7 +290,7 @@
       }, "danger"));
       actions.append(button("Vymazať uloženú hru a rekordy…", () => {
         openModal("Vymazať všetko?", confirmation => {
-          confirmation.append(paragraph("Vymaže sa postup hry aj najlepšie výsledky z minihier v tomto prehliadači. Akciu nie je možné vrátiť."));
+          confirmation.append(paragraph("Vymaže sa postup hry aj najlepšie výsledky z minihier v tomto prehliadači. Spoločná online tabuľka zostane nedotknutá. Akciu nie je možné vrátiť."));
           const row = document.createElement("div"); row.className = "modal-actions";
           row.append(button("Zrušiť", closeModal), button("Vymazať všetko", resetEverything, "danger"));
           confirmation.append(row);

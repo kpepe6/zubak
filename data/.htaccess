@@ -1,0 +1,10 @@
+# Dáta hráčov nemajú byť dostupné priamo z webu.
+# Keď hosting .htaccess ignoruje, nič sa nerozbije: chránený je aj tak len
+# zápis (ten ide výhradne cez scores.php).
+<IfModule mod_authz_core.c>
+    Require all denied
+</IfModule>
+<IfModule !mod_authz_core.c>
+    Order allow,deny
+    Deny from all
+</IfModule>

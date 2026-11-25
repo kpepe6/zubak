@@ -1,26 +1,15 @@
 (function (root) {
   "use strict";
-  const recordKey = "zubak-goulash-records-v1";
-  function validated(value) {
-    if (!value || typeof value.name !== "string" || !value.name.trim() || Array.from(value.name.trim()).length > 20 ||
-        !Number.isInteger(value.score) || value.score < 0 || value.score > 1000 ||
-        !Number.isFinite(value.time) || value.time <= 0 || value.time > 120 ||
-        typeof value.date !== "string" || !Number.isFinite(Date.parse(value.date))) return null;
-    return { name: value.name.trim(), score: value.score, time: value.time, date: new Date(value.date).toISOString() };
+
+  function board() {
+    const scores = root.ZubakScores;
+    if (!scores) throw new Error("Chýba modul ZubakScores.");
+    return scores;
   }
-  function ranked(records) {
-    return records.sort((first, second) => second.score - first.score || Date.parse(first.date) - Date.parse(second.date)).slice(0, 10);
-  }
-  function readRecords(storage) {
-    try { const values = JSON.parse(storage.getItem(recordKey)); return Array.isArray(values) ? ranked(values.map(validated).filter(Boolean)) : []; }
-    catch { return []; }
-  }
-  function saveRecord(storage, record) {
-    const clean = validated(record);
-    if (!clean) return false;
-    try { storage.setItem(recordKey, JSON.stringify(ranked([...readRecords(storage), clean]))); return true; }
-    catch { return false; }
-  }
+
+  function readRecords(storage) { return board().readLocal("goulash", storage); }
+
+  function saveRecord(storage, record) { return board().saveLocal("goulash", storage, record); }
   function open(options = {}) {
     const doc = options.document || root.document;
     const view = doc.defaultView;
@@ -95,6 +84,29 @@
       if (!entries.length) { const row = element("tr", ""); const cell = element("td", "Zatiaľ tu žiadny kotlík nesúťažil."); cell.colSpan = 3; row.append(cell); table.append(row); }
       return table;
     }
+    function onlineRecords(current, localTable) {
+      const section = element("section", "", "goulash-online");
+      section.hidden = true;
+      const scores = root.ZubakScores;
+      if (!scores || !scores.available("goulash")) return section;
+      scores.fetchTop("goulash", { storage }).then(server => {
+        if (closed || !server) return;
+        const entries = current ? scores.merge("goulash", server, [current]) : scores.merge("goulash", server);
+        if (!entries.length) return;
+        const table = element("table", "", "goulash-records goulash-online-records");
+        table.append(element("caption", "Najlepšie kotlíky (online)"));
+        const head = element("tr", ""); ["#", "Meno", "Body"].forEach(label => head.append(element("th", label))); table.append(head);
+        entries.forEach((entry, index) => {
+          const row = element("tr", current && entry.name === current.name && entry.date === current.date ? "goulash-record-current" : "");
+          [index + 1, entry.name, entry.score].forEach(value => row.append(element("td", String(value))));
+          table.append(row);
+        });
+        section.replaceChildren(table, element("p", "Spoločná tabuľka pre všetkých hráčov. Meno a výsledok vidia ostatní.", "goulash-storage-note"));
+        section.hidden = false;
+        if (localTable && localTable.caption) localTable.caption.textContent = "Tvoje výsledky v tomto prehliadači";
+      }).catch(() => {});
+      return section;
+    }
     function startScreen() {
       state = null; resultShown = false; resultRecord = null; pauseButton.hidden = true; hud.textContent = "NG · súťažný kotlík"; feedback.textContent = "V každej fáze máš 30 sekúnd. Ak treba, vyber surovinu a 5-krát stlač tlačidlo alebo medzerník, keď je ukazovateľ čo najbližšie k stredu. Čím bližšie, tým viac bodov.";
       stage.classList.add("goulash-rules");
@@ -109,7 +121,9 @@
         if (!name || Array.from(name).length > 20) { error.textContent = "Zadaj meno do 20 znakov."; return; }
         state = game.create(name); previousTime = null; pauseButton.hidden = false; stage.classList.remove("goulash-rules"); controls();
       });
-      panel.replaceChildren(form, records(), element("p", "Výsledky zostávajú iba v tomto prehliadači, rovnako ako pri zjazde.", "goulash-storage-note"));
+      const localTable = records();
+      panel.replaceChildren(form, onlineRecords(null, localTable), localTable,
+        element("p", "Výsledky sa ukladajú v tomto prehliadači a odosielajú do spoločnej tabuľky, keď je pripojenie.", "goulash-storage-note"));
       input.focus();
     }
     let markerNode;
@@ -147,9 +161,12 @@
       const saved = saveRecord(storage, resultRecord);
       const grade = resultRecord.score >= 750 ? "Guláš ako od víťazky!" : resultRecord.score >= 400 ? "Guláš je navarený." : "Tento kotlík porotu poriadne preverí.";
       feedback.textContent = "Som zvedavá, či tentoraz vyhrám.";
+      const localTable = records(resultRecord);
       panel.replaceChildren(element("h3", grade), element("p", `${resultRecord.score} / 1000 bodov`, "goulash-result"),
-        records(resultRecord), element("p", saved ? "Výsledok je uložený v tomto prehliadači." : "Výsledok sa nepodarilo uložiť.", "goulash-storage-note"),
+        onlineRecords(resultRecord, localTable), localTable,
+        element("p", saved ? "Výsledok je uložený v tomto prehliadači." : "Výsledok sa nepodarilo uložiť.", "goulash-storage-note"),
         button("Variť znova", startScreen, "goulash-replay"), button("Späť na festival", close));
+      board().submit("goulash", resultRecord, { storage }).catch(() => {});
     }
     function draw(time) {
       const stage = state ? Math.min(state.stage, 3) : 0;
@@ -219,6 +236,7 @@
       if (event.code === "Space" && state && state.phase === "cooking" && !/INPUT|BUTTON/.test(event.target.tagName)) { event.preventDefault(); if (!event.repeat) action(); }
     });
     dialog.showModal(); startScreen(); draw(0); frameId = view.requestAnimationFrame(frame);
+    if (root.ZubakScores) root.ZubakScores.flush("goulash", { storage }).catch(() => {});
     return { close };
   }
   root.ZubakGoulashUI = { open, readRecords, saveRecord };

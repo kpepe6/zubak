@@ -23,7 +23,7 @@ Po vysvetlení plánu lesníkom sa opýtaj Miešačky na požičanie. Jej pokaze
 - Ikony hore otvárajú mapu, denník, zvuk, nápovedu a nastavenia. Klávesy `M` a `D` otvárajú mapu a denník; `Escape` ruší výber. Všetky ovládacie prvky sú prístupné pomocou Tab a Enter.
 - Tlačidlo `?` poskytne konkrétny ďalší krok. Hra nemá časový limit ani smrť postavy.
 
-Postup sa automaticky ukladá do miestneho úložiska prehliadača. Pri zablokovanom úložisku možno v nastaveniach stiahnuť a načítať zálohu JSON. Nová hra vyžaduje potvrdenie a tabuľky minihier nemení; samostatná akcia „Vymazať uloženú hru a rekordy“ v nastaveniach zmaže postup aj obe tabuľky. Podpora ukladania pri miestnych stránkach závisí od prehliadača; záloha je prenosná. Identifikátory a formát uloženia zostávajú pri slovenskej lokalizácii nezmenené.
+Postup sa automaticky ukladá do miestneho úložiska prehliadača. Pri zablokovanom úložisku možno v nastaveniach stiahnuť a načítať zálohu JSON. Nová hra vyžaduje potvrdenie a tabuľky minihier nemení; samostatná akcia „Vymazať uloženú hru a rekordy“ v nastaveniach zmaže postup aj obe tabuľky v tomto prehliadači. Spoločnú online tabuľku minihier nemení. Podpora ukladania pri miestnych stránkach závisí od prehliadača; záloha je prenosná. Identifikátory a formát uloženia zostávajú pri slovenskej lokalizácii nezmenené.
 
 Staré uloženia s `bearSafe`, opravenou vodou alebo dokončeným prípadom zostávajú otvorené. Samotné `brnoReady`, starý kontakt, odliatok ani zápisník závoru neotvoria.
 
@@ -33,7 +33,7 @@ Pri obecnom úrade sa starostu opýtaj „Požičiate mi elektrobicykel na zjazd
 
 Šípky vľavo/vpravo alebo A/D riadia, jednotlivé stlačenia medzerníka pridávajú rýchlosť. Na mobile drž smer a druhým prstom ťukaj na pedál. Vyhýbaj sa stromom, kmeňom, zvyškom železnice, medveďovi a Zubák Expresu. Po páde NG sama nasadne, ale stratí tri sekundy. Rýchlosť a chyby ovplyvňujú výsledný čas; jazda zvyčajne trvá približne minútu až dve.
 
-Jedna skutočná sekunda predstavuje jednu hernú minútu: 90 sekúnd sa zobrazí ako 01:30:00. Pauza a skrytie karty hodiny zastavia. Najlepších desať dokončených jázd sa ukladá samostatne do tohto prehliadača; nie sú zdieľané online a po vymazaní dát prehliadača zmiznú. Nedokončená jazda sa nezapisuje. Tabuľka uvádza aj presný skutočný čas, podľa ktorého sa výsledky radia.
+Jedna skutočná sekunda predstavuje jednu hernú minútu: 90 sekúnd sa zobrazí ako 01:30:00. Pauza a skrytie karty hodiny zastavia. Najlepších desať dokončených jázd sa ukladá samostatne do tohto prehliadača a zároveň sa odosiela do spoločnej online tabuľky. Bez pripojenia sa nič nemení: jazda, lokálna tabuľka aj príbeh fungujú ďalej a výsledok sa odošle pri ďalšom pripojení. Nedokončená jazda sa nezapisuje. Tabuľka uvádza aj presný skutočný čas, podľa ktorého sa výsledky radia.
 
 ## Varenie guláša
 
@@ -41,14 +41,42 @@ Na ihrisku klikni na festivalový kotlík a zvoľ „Zúčastniť sa gulášfest
 
 Akcie ovládaj kliknutím, dotykom alebo cez Tab a Enter/medzerník. Jeden pokus trvá najviac dve minúty aktívneho času; zmeškané kroky znižujú výsledok, ale hru nezablokujú. Pauza, skrytie karty a strata focusu varenie zastavia; pokračovanie je vždy ručné. Odchod rozvarený pokus neuloží.
 
-Najlepších desať dokončených kotlíkov sa ukladá lokálne rovnako ako pri bicykli. Poradie určuje počet bodov, pri zhode skorší výsledok; čas nerozhoduje. Čím bližšie k stredu ukazovateľa zasiahneš, tým viac bodov dostaneš. Zlá surovina a nedokončené kroky znižujú výsledok. Tabuľka používa vlastný kľúč `zubak-goulash-records-v1`, nie je online a vymazaním dát prehliadača zmizne. Nová príbehová hra ju nemaže. Úspech, neúspech ani tofu nemenia inventár, úlohy alebo ukončenie príbehu. Pravidlá sú v `goulash.js`, rozhranie a tabuľka v `goulash-ui.js`, samostatné štýly v `goulash.css`.
+Najlepších desať dokončených kotlíkov sa ukladá lokálne rovnako ako pri bicykli a zároveň sa odosiela do spoločnej online tabuľky. Poradie určuje počet bodov, pri zhode skorší výsledok; čas nerozhoduje. Čím bližšie k stredu ukazovateľa zasiahneš, tým viac bodov dostaneš. Zlá surovina a nedokončené kroky znižujú výsledok. Lokálna tabuľka používa vlastný kľúč `zubak-goulash-records-v1` a vymazaním dát prehliadača zmizne; online tabuľka tým dotknutá nie je. Nová príbehová hra ju nemaže. Úspech, neúspech ani tofu nemenia inventár, úlohy alebo ukončenie príbehu. Pravidlá sú v `goulash.js`, rozhranie a tabuľka v `goulash-ui.js`, samostatné štýly v `goulash.css`.
+
+## Online tabuľky minihier
+
+Obe minihry posielajú dokončené výsledky do spoločnej tabuľky, ktorú vidia všetci hráči. Ukladá ju `scores.php` do súboru `data/scores.json` priamo v priečinku s hrou – bez databázy, bez registrácie a bez externých služieb.
+
+- **Priorita je online tabuľka.** Keď sa načíta, zobrazí sa nad lokálnou tabuľkou ako „Najlepší hráči (online)“. Lokálna tabuľka sa potom zobrazí ako „Tvoje výsledky v tomto prehliadači“.
+- **Bez pripojenia sa nič nedeje.** Ak server neodpovie do 5 sekúnd, tabuľka sa jednoducho nezobrazí: žiadna chybová hláška, žiadne blokovanie hry. Výsledok zostane v lokálnej tabuľke a čaká vo fronte `zubak-scores-queue-v1`, odkiaľ sa odošle pri ďalšom otvorení minihry.
+- **História pri prvom spojení:** keď sa hráč prvýkrát pripojí k serveru, odošle sa jeho lokálna top 10 (aby tabuľka nezačínala prázdna). Deje sa to raz, chránené kľúčom `zubak-scores-uploaded-v1`.
+- **Čo je verejné:** iba prezývka, výsledok a dátum. Nič iné sa neposiela a prehliadač neposiela žiadne identifikátory hráča.
+- **Obmedzenia:** server validuje každý záznam rovnako ako hra (dĺžka mena, rozsahy času, pády, body), drží najviac 100 záznamov na hru a povoľuje 30 odoslaní za hodinu z jednej IP. Podvádzanie pri skóre sa bez overenia na serveri vylúčiť nedá.
+- **Súbeh:** zápis je pod zámkom (`flock`) a ide cez dočasný súbor + `rename`, takže dva výsledky naraz sa nestratia.
+- **Vypnutie:** v `scores.js` nastav `const endpoint = "";` – hra potom používa iba lokálne tabuľky a žiadny request sa neposiela.
+
+### Nasadenie na Webzdarma (program Zdarma)
+
+1. Nahraj celý priečinok do priestoru webu (správca súborov alebo FTP). `index.html` a `scores.php` musia byť v tom istom adresári.
+2. Otvor `http://tvoja-adresa.wz.cz/scores.php?health=1`. Musíš vidieť `{"ok":true, ..., "data":"writable"}`.
+3. Ak sa ukáže `"data":"not-writable"`, nastav v správcovi súborov priečinku `data` práva zápisu (777) a skús to znova.
+4. Pri nahrávaní novej verzie hry dávaj pozor, aby si neprepísal `data/scores.json` – najprv si ho stiahni ako zálohu.
+
+Poznámky k hostingu: program Zdarma má PHP 7.4 – 8.4, 0,5 GB priestoru, 1 GB prenosu mesačne, vkladá reklamu a nepodporuje HTTPS. GitHub Pages PHP nespustí, takže tam bude fungovať iba lokálna tabuľka.
 
 ## Testy
 
 S Node.js 18 alebo novším:
 
 ```sh
-node --test core.test.js
+node --test core.test.js scores.test.js
+```
+
+PHP časť (voliteľne, ak máš PHP v príkazovom riadku):
+
+```sh
+php tests/scores.test.php
+php -l scores.php
 ```
 
 Pravidlá a príbehové podmienky sú v `core.js`, grafika v `art.js`, ovládanie a ukladanie v `game.js`. Testy pokrývajú aj slovenské názvy a zachovanie rodinných detailov.

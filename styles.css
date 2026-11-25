@@ -28,6 +28,7 @@
 .bike-records{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
 .bike-records caption{text-align:left;padding:10px 0;font-weight:700}.bike-records th,.bike-records td{text-align:left;padding:8px;border-bottom:1px solid #5b7b68;overflow-wrap:anywhere}
 .bike-record-current{background:#3a6045;color:#ffe396}.bike-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.bike-online{margin:6px 0 14px}.bike-online .bike-records-caption{color:#ffe9a8;font-size:15px}
 @media(max-width:540px){.bike-dialog{padding:10px}.bike-title{font-size:20px;width:100%}.bike-header{gap:6px}.bike-header button{padding:8px 10px}.bike-controls{grid-template-columns:48px minmax(72px,1fr) minmax(65px,1fr) 48px;gap:6px}.bike-control{font-size:16px}.bike-hud{font-size:12px;line-height:1.5}.bike-records th,.bike-records td{padding:6px 3px;font-size:12px}.bike-instructions{font-size:13px}}
 .world[data-scene="spring"] canvas{object-fit:fill}
 .world[data-scene="spring"] [data-target="warden"]{transform:translate(0,-50%)}
