@@ -23,7 +23,7 @@ Po vysvetlení plánu lesníkom sa opýtaj Miešačky na požičanie. Jej pokaze
 - Ikony hore otvárajú mapu, denník, zvuk, nápovedu a nastavenia. Klávesy `M` a `D` otvárajú mapu a denník; `Escape` ruší výber. Všetky ovládacie prvky sú prístupné pomocou Tab a Enter.
 - Tlačidlo `?` poskytne konkrétny ďalší krok. Hra nemá časový limit ani smrť postavy.
 
-Postup sa automaticky ukladá do miestneho úložiska prehliadača. Pri zablokovanom úložisku možno v nastaveniach stiahnuť a načítať zálohu JSON. Nová hra vyžaduje potvrdenie a tabuľky minihier nemení; samostatná akcia „Vymazať uloženú hru a rekordy“ v nastaveniach zmaže postup aj obe tabuľky v tomto prehliadači. Spoločnú online tabuľku minihier nemení. Podpora ukladania pri miestnych stránkach závisí od prehliadača; záloha je prenosná. Identifikátory a formát uloženia zostávajú pri slovenskej lokalizácii nezmenené.
+Postup sa automaticky ukladá do miestneho úložiska prehliadača. Tlačidlo „Pokračovať v hre“ sa na úvodnej obrazovke zobrazí až vtedy, keď existuje rozohraný prípad – pri prvom spustení na novom zariadení ani po dohraní hry tam nie je. Pri zablokovanom úložisku možno v nastaveniach stiahnuť a načítať zálohu JSON. Nová hra vyžaduje potvrdenie a tabuľky minihier nemení; samostatná akcia „Vymazať uloženú hru a rekordy“ v nastaveniach zmaže postup aj obe tabuľky v tomto prehliadači. Spoločnú online tabuľku minihier nemení. Podpora ukladania pri miestnych stránkach závisí od prehliadača; záloha je prenosná. Identifikátory a formát uloženia zostávajú pri slovenskej lokalizácii nezmenené.
 
 Staré uloženia s `bearSafe`, opravenou vodou alebo dokončeným prípadom zostávajú otvorené. Samotné `brnoReady`, starý kontakt, odliatok ani zápisník závoru neotvoria.
 

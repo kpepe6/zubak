@@ -1195,3 +1195,33 @@ test("vstup dá plán bez hudby a obnova starých uložení nepreskočí nové v
     }
   }
 });
+
+test("úvod ponúkne pokračovanie iba pri rozohratej hre", () => {
+  assert.equal(game.hasProgress(game.createState()), false);
+  assert.equal(game.hasProgress(null), false);
+  assert.equal(game.hasProgress({}), false);
+  const started = game.createState();
+  started.flags.introSeen = true;
+  assert.equal(game.hasProgress(started), true);
+  const moved = game.createState();
+  moved.moves = 1;
+  assert.equal(game.hasProgress(moved), true);
+  const clue = game.createState();
+  clue.clues.push("Prvá stopa");
+  assert.equal(game.hasProgress(clue), true);
+  const visited = game.createState();
+  visited.visited.push("field");
+  assert.equal(game.hasProgress(visited), true);
+  const elsewhere = game.createState();
+  elsewhere.location = "field";
+  assert.equal(game.hasProgress(elsewhere), true);
+  const item = game.createState();
+  item.inventory.push("chalk");
+  assert.equal(game.hasProgress(item), true);
+  const flag = game.createState();
+  flag.flags.fifkoAsked = true;
+  assert.equal(game.hasProgress(flag), true);
+  const finished = game.createState();
+  finished.finished = true;
+  assert.equal(game.hasProgress(finished), true);
+});

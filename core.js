@@ -73,6 +73,18 @@
     melody: ["Papier na lavičke", "take"], panorama: ["Výhľad z rozhľadne", "inspect"], tireRuts: ["Koľaje po SUV", "inspect"], ridgeview: ["Hrebeňová panoráma", "inspect"], cabinMemory: ["Spomienka na chatku", "inspect"], phone: ["Telefón pri chatke", "take"]
   };
   function createState() { return { version: 1, location: "home", inventory: ["notebook"], flags: {}, clues: [], visited: ["home"], moves: 0, finished: false }; }
+  function hasProgress(value) {
+    if (!value || typeof value !== "object") return false;
+    if (value.finished) return true;
+    if (value.flags && value.flags.introSeen) return true;
+    if ((value.moves || 0) > 0) return true;
+    if (Array.isArray(value.clues) && value.clues.length > 0) return true;
+    if (Array.isArray(value.visited) && value.visited.length > 1) return true;
+    if (typeof value.location === "string" && value.location !== "home") return true;
+    if (Array.isArray(value.inventory) && value.inventory.some(item => item !== "notebook")) return true;
+    if (value.flags) return Object.keys(value.flags).some(key => key !== "introSeen" && Boolean(value.flags[key]));
+    return false;
+  }
   function scene(state) {
     const place = places.find(place => place.id === state.location);
     const locked = place.id === "spring" && !state.flags.bearSafe;
@@ -463,7 +475,7 @@
     };
     return state.inventory.filter(item => !obsolete[item]);
   }
-  const api = { places, people, items, objects, createState, restore, scene, interact, hint, quests, availableTopics, activeInventory };
+  const api = { places, people, items, objects, createState, hasProgress, restore, scene, interact, hint, quests, availableTopics, activeInventory };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   root.Zubak = api;
 })(typeof globalThis !== "undefined" ? globalThis : this);

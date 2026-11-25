@@ -192,7 +192,7 @@
     const opening = game.createState(); opening.location = "pub";
     globalThis.ZubakArt.draw(opening, false, 0, player);
     byId("intro").style.backgroundImage = `url("${byId("scene").toDataURL("image/png")}")`;
-    byId("intro-continue").hidden = state.finished;
+    byId("intro-continue").hidden = state.finished || !game.hasProgress(state);
     byId("intro-finale").hidden = !state.finished;
     byId("intro").showModal();
   }
@@ -634,7 +634,11 @@
     byId("intro").close();
     globalThis.ZubakEnding.start(showIntro);
   });
-  byId("intro").addEventListener("cancel", event => { event.preventDefault(); if (!state.finished) continueStory(); });
+  byId("intro").addEventListener("cancel", event => {
+    event.preventDefault();
+    if (state.finished) return;
+    if (game.hasProgress(state)) continueStory(); else startStory();
+  });
   function frame(timestamp) {
     const delta = Math.min((timestamp - previousTime) / 1000, .05); previousTime = timestamp;
     if (bikeActive || goulashActive) { requestAnimationFrame(frame); return; }

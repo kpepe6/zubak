@@ -651,6 +651,19 @@
     setup();
     check(harness.doc.getElementById("intro-finale").hidden, "Finale replay unlocked before finishing");
   });
+  test("UI: first launch hides continue, started game offers it", () => {
+    setup();
+    check(harness.doc.getElementById("intro-continue").hidden, "Continue is offered on a fresh device");
+    check(!harness.doc.getElementById("intro-start").hidden, "New game is missing on a fresh device");
+    const started = harness.game.createState();
+    started.flags.introSeen = true;
+    setup(started);
+    check(!harness.doc.getElementById("intro-continue").hidden, "Started game cannot be continued");
+    const progressed = harness.game.createState();
+    progressed.clues.push("Prvá stopa");
+    setup(progressed);
+    check(!harness.doc.getElementById("intro-continue").hidden, "Saved progress cannot be continued");
+  });
   test("UI: quiet effects follow new game events and respect mute", () => {
     setup();
     const button = harness.doc.getElementById("sound-button");
